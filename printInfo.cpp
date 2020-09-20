@@ -9,31 +9,31 @@ void printMacAddr(u_int8_t* addr);
 void printIPAddr(struct in_addr addr);
 
 void printPktInfo(const u_char* packet, int pktlen){
-    struct libnet_ethernet_hdr* ethernet_hdr = (libnet_ethernet_hdr*)packet;
-    struct libnet_ipv4_hdr* ipv4_hdr = (libnet_ipv4_hdr*)((char*)(ethernet_hdr)+ETHER_HDR_LEN);
+	struct libnet_ethernet_hdr* ethernet_hdr = (libnet_ethernet_hdr*)packet;
+	struct libnet_ipv4_hdr* ipv4_hdr = (libnet_ipv4_hdr*)((char*)(ethernet_hdr)+ETHER_HDR_LEN);
 
-    int ipLen = (*((char*)ipv4_hdr)&0x0F)<<2;		//caculate the length of ip header
-    struct libnet_tcp_hdr* tcp_hdr = (libnet_tcp_hdr*)((char*)ipv4_hdr+ipLen);
+	int ipLen = (*((char*)ipv4_hdr)&0x0F)<<2;		//caculate the length of ip header
+	struct libnet_tcp_hdr* tcp_hdr = (libnet_tcp_hdr*)((char*)ipv4_hdr+ipLen);
 
-    int tcpLen = ((*((char*)tcp_hdr+12))&0xF0)>>2;  //caculate the length of tcp header
-    const u_char* payload = (u_char*)tcp_hdr + tcpLen;
+	int tcpLen = ((*((char*)tcp_hdr+12))&0xF0)>>2;  	//caculate the length of tcp header
+	const u_char* payload = (u_char*)tcp_hdr + tcpLen;
 
-    int payloadLen = pktlen - ETHER_HDR_LEN - ipLen - tcpLen;
-
-    printf("Packet Length: %d\n",pktlen);
-    printEtherInfo(ethernet_hdr);
+	int payloadLen = pktlen - ETHER_HDR_LEN - ipLen - tcpLen;
+	
+	printf("Packet Length: %d\n",pktlen);
+	printEtherInfo(ethernet_hdr);
 	puts("");
 
-    printf("IP Header Length: %d\n",ipLen);
-    printIPv4Info(ipv4_hdr);
+	printf("IP Header Length: %d\n",ipLen);
+	printIPv4Info(ipv4_hdr);
 	puts("");
 
-    printf("TCP Header Length: %d\n",tcpLen);
-    printTCPInfo(tcp_hdr);
+	printf("TCP Header Length: %d\n",tcpLen);
+	printTCPInfo(tcp_hdr);
 	puts("");
 
-    printf("Payload Length: %d\n",payloadLen);
-    printPayloadData(payload, payloadLen);
+	printf("Payload Length: %d\n",payloadLen);
+	printPayloadData(payload, payloadLen);
 	puts("\n");
 }
 
