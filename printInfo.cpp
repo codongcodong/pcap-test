@@ -6,23 +6,26 @@
 #define ETHER_HDR_LEN 14
 
 void printMacAddr(u_int8_t* addr);
-void printIPAddr(struct in_addr addr);
+void printIPAddr(struct in_addr* addr);
 
 void printPktInfo(const u_char* packet, int pktlen){
 	struct libnet_ethernet_hdr* ethernet_hdr = (libnet_ethernet_hdr*)packet;
 	struct libnet_ipv4_hdr* ipv4_hdr = (libnet_ipv4_hdr*)((char*)(ethernet_hdr)+ETHER_HDR_LEN);
 
-	int ipLen = (*((char*)ipv4_hdr)&0x0F)<<2;		//caculate the length of ip header
+	uint16_t totalLen = ntohs(*((uint16_t*)ipv4_hdr+1)); 	//caculate the total length of ip packet
+	int ipLen = (*((char*)ipv4_hdr)&0x0F)<<2;				//caculate the length of ip header
 	struct libnet_tcp_hdr* tcp_hdr = (libnet_tcp_hdr*)((char*)ipv4_hdr+ipLen);
 
-	int tcpLen = ((*((char*)tcp_hdr+12))&0xF0)>>2;  	//caculate the length of tcp header
+	int tcpLen = ((*((char*)tcp_hdr+12))&0xF0)>>2;  		//caculate the length of tcp header
 	const u_char* payload = (u_char*)tcp_hdr + tcpLen;
 
-	int payloadLen = pktlen - ETHER_HDR_LEN - ipLen - tcpLen;
+	int payloadLen = totalLen - ipLen - tcpLen;
 	
 	printf("Packet Length: %d\n",pktlen);
 	printEtherInfo(ethernet_hdr);
 	puts("");
+
+	printf("IP Packet Total Length: %hu\n", totalLen);
 
 	printf("IP Header Length: %d\n",ipLen);
 	printIPv4Info(ipv4_hdr);
@@ -46,9 +49,9 @@ void printEtherInfo(struct libnet_ethernet_hdr* ethernet_hdr){
 
 void printIPv4Info(struct libnet_ipv4_hdr* ipv4_hdr){
 	printf("Src IP addr: ");
-	printIPAddr(ipv4_hdr->ip_src);
+	printIPAddr(&ipv4_hdr->ip_src);
 	printf("Dst IP addr: ");
-	printIPAddr(ipv4_hdr->ip_dst);
+	printIPAddr(&ipv4_hdr->ip_dst);
 }
 
 void printTCPInfo(struct libnet_tcp_hdr* tcp_hdr){
@@ -72,7 +75,9 @@ void printMacAddr(u_int8_t* addr){
 	puts("");
 }
 
-void printIPAddr(struct in_addr addr){
-	puts(inet_ntoa(addr));
+void printIPAddr(struct in_addr* addr){
+	char buf[16];
+	inet_ntop(AF_INET,addr, buf, sizeof(buf));
+	puts(buf);
 }
 

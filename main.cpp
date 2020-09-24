@@ -12,7 +12,7 @@ void usage() {
 
 bool isTCPpkt(const u_char* packet){
     struct libnet_ipv4_hdr* ipv4_hdr = (libnet_ipv4_hdr*)(packet+ETHER_HDR_LEN);
-    if(ipv4_hdr->ip_p==6)
+    if(ipv4_hdr->ip_p==IPPROTO_TCP)
         return true;
     else
         return false;
